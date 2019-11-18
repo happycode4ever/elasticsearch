@@ -17,6 +17,7 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -230,6 +231,21 @@ public class ESClient {
         }
     }
 
+    //多关键字空格分开检索
+    public void matchQuery(String index,String type,String field,String value){
+        SearchResponse searchResponse = client.prepareSearch(index).setTypes(type).setQuery(QueryBuilders.matchQuery(field,value).operator(Operator.AND))
+                //可以设置分页查询 默认从0条开始，每页显示10条
+                //.setFrom(0).setSize(10)
+                .get();
+        //获取命中的搜索
+        SearchHits hits = searchResponse.getHits();
+        //命中的数量
+        System.out.println(hits.totalHits);
+        for(SearchHit hit : hits){
+            System.out.println(hit.getSourceAsString());
+        }
+    }
+
     public void close() {
         client.close();
     }
@@ -247,7 +263,8 @@ public class ESClient {
 //        client.matchAllQuery("demo1","article");
 //        client.queryStringQuery("demo1","article","1");
 //        client.wildCardQuery("demo1","article","content","*全*");
-        client.termQuery("demo1","article","content","全");
+//        client.termQuery("ikdemo1","iktype","content","全文");
+        client.matchQuery("ikdemo1","iktype","content","基于    33");
         client.close();
     }
 }
